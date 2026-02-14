@@ -20,8 +20,9 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Debug region
-        run: echo "Region is: ${GAR_REGION}"
-        run: echo "Region is: ${{ secrets.GCP_GAR_REGION }}"
+        run: |
+          echo "Region is: ${GAR_REGION}"
+          echo "Region is: ${{ secrets.GCP_GAR_REGION }}"
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
