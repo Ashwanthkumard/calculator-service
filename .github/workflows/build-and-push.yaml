@@ -26,11 +26,11 @@ jobs:
 
       - name: Configure Docker for GAR
         run: |
-          gcloud auth configure-docker $GAR_REGION-docker.pkg.dev --quiet
+          gcloud auth configure-docker ${GAR_REGION}-docker.pkg.dev --quiet
 
       - name: Build Docker image
         run: |
-          IMAGE="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}"
+          IMAGE="${GAR_REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           docker build -t $IMAGE .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
