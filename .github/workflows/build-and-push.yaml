@@ -1,0 +1,39 @@
+GCP_SA_KEYname: Build and Push to GAR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GAR_REGION: ${{ secrets.GCP_GAR_REGION }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REPOSITORY: calculator-docker
+  IMAGE_NAME: calculator-service
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker for GAR
+        run: |
+          gcloud auth configure-docker $GAR_REGION-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        run: |
+          IMAGE="$GAR_REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}"
+          docker build -t $IMAGE .
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE
