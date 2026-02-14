@@ -5,40 +5,39 @@ on:
     branches:
       - main
 
-env:
-  GAR_REGION: ${{ secrets.GCP_GAR_REGION }}
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REPOSITORY: calculator-docker
-  IMAGE_NAME: calculator-service
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Debug region
-        run: |
-          echo "Region is: ${GAR_REGION}"
-          echo "Region is: ${{ secrets.GCP_GAR_REGION }}"
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set GCP project
+        run: gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+
       - name: Configure Docker for GAR
         run: |
-          gcloud auth configure-docker ${GAR_REGION}-docker.pkg.dev --quiet
+          gcloud auth configure-docker "${{ secrets.GCP_GAR_REGION }}-docker.pkg.dev" --quiet
 
       - name: Build Docker image
         run: |
-          IMAGE="${GAR_REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          docker build -t $IMAGE .
+          IMAGE="${{ secrets.GCP_GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/calculator-docker/calculator-service:${{ github.sha }}"
+          docker build -t "$IMAGE" .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       - name: Push Docker image
         run: |
-          docker push $IMAGE
+          docker push "$IMAGE"
