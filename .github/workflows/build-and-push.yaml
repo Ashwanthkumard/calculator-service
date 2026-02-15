@@ -34,7 +34,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE="${{ secrets.GCP_GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/calculator-docker/calculator-service:${{ github.sha }}"
+          IMAGE="${{ secrets.GCP_GAR_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/calculator-docker/calculator-service:latest"
           docker build -t "$IMAGE" .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
